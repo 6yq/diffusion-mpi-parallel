@@ -1,4 +1,4 @@
-#include "diffusion_solver.hpp"
+#include "DiffusionSolver.hpp"
 #include "note.hpp"
 #include <cmath>
 #include <cstdlib>
