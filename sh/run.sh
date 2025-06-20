@@ -43,7 +43,7 @@ fi
 # ---
 if [[ "$PLATFORM" == "remote" ]]; then
   echo "[Info] Submitting sbatch job"
-  sbatch ${MODE}.sbatch $SIZE
+  sbatch ./sbatch/${MODE}.sbatch $SIZE
 else
   echo "[Info] Running locally"
   if [[ "$MODE" == "serial" ]]; then
