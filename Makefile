@@ -62,7 +62,6 @@ $(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(SRC)/DiffusionSolverMPI.cpp $(COMMON_SRC)
 $(REFDIR)/base%.out: $(SHDIR)/run.sh
 	@mkdir -p $(REFDIR)
 	bash $(SHDIR)/run.sh serial $* --genRef
-	mv $(REFDIR)/base.out $@
 
 # --------------------
 # Generate output results (test run)
@@ -70,7 +69,6 @@ $(REFDIR)/base%.out: $(SHDIR)/run.sh
 $(OUTDIR)/opt%.out: $(SHDIR)/run.sh
 	@mkdir -p $(OUTDIR)
 	bash $(SHDIR)/run.sh $(OPTMODE) $*
-	mv $(OUTDIR)/opt.out $@
 
 # --------------------
 # Clean up
