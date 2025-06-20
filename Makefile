@@ -45,7 +45,7 @@ serial: $(BUILD)/serial.exe
 
 $(BUILD)/serial.exe: $(SRC)/mainSerial.cpp $(SRC)/DiffusionSolver.cpp $(COMMON_SRC) $(COMMON_HDR)
 	@mkdir -p $(BUILD)
-	$(CPP) $(CFLAGS) $(OPTFLAGS) $(INTELFLAGS) $^ -o $@
+	$(CPP) $(COMMON_SRC) -o $@ $(CFLAGS) $(OPTFLAGS) $(INTELFLAGS)
 
 # --------------------
 # Build mpi target
@@ -54,7 +54,7 @@ mpi: $(BUILD)/mpi.exe
 
 $(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(SRC)/DiffusionSolverMPI.cpp $(COMMON_SRC) $(COMMON_HDR)
 	@mkdir -p $(BUILD)
-	$(CPP) $(CFLAGS) $(OPTFLAGS) $(MPIFLAGS) $(INTELFLAGS) $^ -o $@
+	$(CPP) $(COMMON_SRC) -o $@ $(CFLAGS) $(OPTFLAGS) $(MPIFLAGS) $(INTELFLAGS)
 
 # --------------------
 # Generate reference results
