@@ -5,4 +5,6 @@ void init(double *phi0, int n_theta, int n_phi, double radius, double dt,
 
 void step();
 
+void transfer(double *phi);
+
 void free_memory();

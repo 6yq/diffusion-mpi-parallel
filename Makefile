@@ -25,6 +25,7 @@ USERNAME := $(shell whoami)
 SAMPLES := 256 512 1024 2048 4096
 REFS    := $(SAMPLES:%=$(REFDIR)/base%.out)
 OUTS    := $(SAMPLES:%=$(OUTDIR)/opt%.out)
+OPTMODE ?= mpi
 
 # --------------------
 # Top-level targets
@@ -34,7 +35,7 @@ OUTS    := $(SAMPLES:%=$(OUTDIR)/opt%.out)
 ref: $(REFS)
 run: $(OUTS)
 
-COMMON_SRC := $(SRC)/DiffusionSolver.cpp $(SRC)/scenarios.cpp $(SRC)/correctness.cpp
+COMMON_SRC := $(SRC)/scenarios.cpp $(SRC)/correctness.cpp
 COMMON_HDR := $(SRC)/DiffusionSolver.hpp $(SRC)/scenarios.hpp $(SRC)/note.hpp $(SRC)/correctness.hpp
 
 # --------------------
@@ -42,7 +43,7 @@ COMMON_HDR := $(SRC)/DiffusionSolver.hpp $(SRC)/scenarios.hpp $(SRC)/note.hpp $(
 # --------------------
 serial: $(BUILD)/serial.exe
 
-$(BUILD)/serial.exe: $(SRC)/mainSerial.cpp $(COMMON_SRC) $(COMMON_HDR)
+$(BUILD)/serial.exe: $(SRC)/mainSerial.cpp $(SRC)/DiffusionSolver.cpp $(COMMON_SRC) $(COMMON_HDR)
 	@mkdir -p $(BUILD)
 	$(CPP) $(CFLAGS) $(OPTFLAGS) $(INTELFLAGS) $^ -o $@
 
@@ -51,7 +52,7 @@ $(BUILD)/serial.exe: $(SRC)/mainSerial.cpp $(COMMON_SRC) $(COMMON_HDR)
 # --------------------
 mpi: $(BUILD)/mpi.exe
 
-$(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(COMMON_SRC) $(COMMON_HDR)
+$(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(SRC)/DiffusionSolverMPI.cpp $(COMMON_SRC) $(COMMON_HDR)
 	@mkdir -p $(BUILD)
 	$(CPP) $(CFLAGS) $(OPTFLAGS) $(MPIFLAGS) $(INTELFLAGS) $^ -o $@
 
@@ -68,7 +69,7 @@ $(REFDIR)/base%.out: $(SHDIR)/run.sh
 # --------------------
 $(OUTDIR)/opt%.out: $(SHDIR)/run.sh
 	@mkdir -p $(OUTDIR)
-	bash $(SHDIR)/run.sh serial $*
+	bash $(SHDIR)/run.sh $(OPTMODE) $*
 	mv $(OUTDIR)/opt.out $@
 
 # --------------------

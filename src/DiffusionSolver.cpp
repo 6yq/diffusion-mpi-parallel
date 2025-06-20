@@ -100,6 +100,8 @@ void step() {
   t++;
 }
 
+void transfer(double *h) { return; }
+
 void free_memory() {
   free(rhs);
   free(rhs1);
