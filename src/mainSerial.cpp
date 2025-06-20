@@ -5,13 +5,8 @@
 #include <time.h>
 
 #include "DiffusionSolver.hpp"
+#include "correctness.hpp"
 #include "scenarios.hpp"
-
-typedef struct {
-  int n_theta, n_phi;
-  double dt, radius, mu_a, mu_s;
-  int num_iter, save_iter;
-} Header;
 
 int main(int argc, char **argv) {
   int n_theta = 120, n_phi = 240;
@@ -68,7 +63,7 @@ int main(int argc, char **argv) {
   if (gen_ref)
     sprintf(output_file, "ref/base.out");
   else
-    sprintf(output_file, "output.out");
+    sprintf(output_file, "opt/opt.out");
 
   FILE *fptr = fopen(output_file, "wb");
   if (!fptr) {
@@ -102,5 +97,10 @@ int main(int argc, char **argv) {
   fclose(fptr);
 
   printf("Output written to %s\n", output_file);
+
+  if (!gen_ref) {
+    print_error(output_file, n_theta);
+  }
+
   return 0;
 }

@@ -1,6 +1,6 @@
 SHELL = bash
 
-CPP ?= mpic++
+CPP = mpic++
 # on remote:
 # CPP = mpiicc
 
@@ -16,7 +16,7 @@ INTELFLAGS ?=
 BUILD   := build
 SRC     := src
 REFDIR  := ref
-OUTDIR  := output
+OUTDIR  := opt
 SHDIR   := sh
 
 HOSTNAME := $(shell hostname)
@@ -24,7 +24,7 @@ USERNAME := $(shell whoami)
 
 SAMPLES := 256 512 1024 2048 4096
 REFS    := $(SAMPLES:%=$(REFDIR)/base%.out)
-OUTS    := $(SAMPLES:%=$(OUTDIR)/output%.out)
+OUTS    := $(SAMPLES:%=$(OUTDIR)/opt%.out)
 
 # --------------------
 # Top-level targets
@@ -34,13 +34,15 @@ OUTS    := $(SAMPLES:%=$(OUTDIR)/output%.out)
 ref: $(REFS)
 run: $(OUTS)
 
+COMMON_SRC := $(SRC)/DiffusionSolver.cpp $(SRC)/scenarios.cpp $(SRC)/correctness.cpp
+COMMON_HDR := $(SRC)/DiffusionSolver.hpp $(SRC)/scenarios.hpp $(SRC)/note.hpp $(SRC)/correctness.hpp
+
 # --------------------
 # Build serial target
 # --------------------
 serial: $(BUILD)/serial.exe
 
-$(BUILD)/serial.exe: $(SRC)/mainSerial.cpp $(SRC)/DiffusionSolver.cpp $(SRC)/scenarios.cpp \
-                     $(SRC)/DiffusionSolver.hpp $(SRC)/scenarios.hpp $(SRC)/note.hpp
+$(BUILD)/serial.exe: $(SRC)/mainSerial.cpp $(COMMON_SRC) $(COMMON_HDR)
 	@mkdir -p $(BUILD)
 	$(CPP) $(CFLAGS) $(OPTFLAGS) $(INTELFLAGS) $^ -o $@
 
@@ -49,8 +51,7 @@ $(BUILD)/serial.exe: $(SRC)/mainSerial.cpp $(SRC)/DiffusionSolver.cpp $(SRC)/sce
 # --------------------
 mpi: $(BUILD)/mpi.exe
 
-$(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(SRC)/DiffusionSolver.cpp $(SRC)/scenarios.cpp \
-                  $(SRC)/DiffusionSolver.hpp $(SRC)/scenarios.hpp $(SRC)/note.hpp
+$(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(COMMON_SRC) $(COMMON_HDR)
 	@mkdir -p $(BUILD)
 	$(CPP) $(CFLAGS) $(OPTFLAGS) $(MPIFLAGS) $(INTELFLAGS) $^ -o $@
 
@@ -65,10 +66,10 @@ $(REFDIR)/base%.out: $(SHDIR)/run.sh
 # --------------------
 # Generate output results (test run)
 # --------------------
-$(OUTDIR)/output%.out: $(SHDIR)/run.sh
+$(OUTDIR)/opt%.out: $(SHDIR)/run.sh
 	@mkdir -p $(OUTDIR)
 	bash $(SHDIR)/run.sh serial $*
-	mv $(OUTDIR)/output.out $@
+	mv $(OUTDIR)/opt.out $@
 
 # --------------------
 # Clean up
