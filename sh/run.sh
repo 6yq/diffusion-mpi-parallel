@@ -44,21 +44,12 @@ fi
 if [[ "$PLATFORM" == "remote" ]]; then
   echo "[Info] Submitting sbatch job"
   sbatch ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
-
-  if [[ "$GENREF" == "--genRef" ]]; then
-    mv ref/base.out ref/base${SIZE}.out
-    mv serial.log ref/serial${SIZE}.log
-  else
-    mv opt/opt.out opt/opt${SIZE}.out
-    mv mpi.log opt/mpi${SIZE}.log
-  fi
 else
   echo "[Info] Running locally"
   if [[ "$MODE" == "serial" ]]; then
     ./build/serial.exe --n-theta $SIZE --n-phi $SIZE $GENREF_FLAG
   elif [[ "$MODE" == "mpi" ]]; then
     mpirun -np 4 ./build/mpi.exe --n-theta $SIZE --n-phi $SIZE
-    mv ref/base.out ref/base${SIZE}.out
   else
     echo "[Error] Unknown mode: $MODE"
     exit 1
