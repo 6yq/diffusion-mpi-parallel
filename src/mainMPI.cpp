@@ -69,9 +69,9 @@ int main(int argc, char **argv) {
            (double)(init_end - init_start) / CLOCKS_PER_SEC);
 
   if (gen_ref)
-    sprintf(output_file, "ref/base.out");
+    sprintf(output_file, "ref/base%d.out", n_theta);
   else
-    sprintf(output_file, "opt/opt.out");
+    sprintf(output_file, "opt/opt%d.out", n_theta);
 
   FILE *fptr = NULL;
   if (rank == 0) {

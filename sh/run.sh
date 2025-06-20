@@ -43,7 +43,11 @@ fi
 # ---
 if [[ "$PLATFORM" == "remote" ]]; then
   echo "[Info] Submitting sbatch job"
-  sbatch ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
+  if [[ "$MODE" == "serial" ]]; then
+    sbatch --output=ref/serial${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
+  elif [[ "$MODE" == "mpi" ]]; then
+    sbatch --output=ref/mpi${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
+  fi
 else
   echo "[Info] Running locally"
   if [[ "$MODE" == "serial" ]]; then
