@@ -1,5 +1,6 @@
-CPP=mpic++
-# DO NOT FORGET to replace on remote:
+SHELL=bash
+CPP?=mpic++
+# on remote:
 # CPP=mpiicc
 
 CFLAGS=-lm
@@ -7,26 +8,31 @@ COPTFLAGS=-O3 -ffast-math -fopenmp -flto -march=native -funroll-loops
 OPTFLAGS=-O3 -ffast-math -fopenmp -flto -march=native -funroll-loops
 MPIFLAGS=-D_MPI
 DEBUGFLAGS=-g -pg
-
-# DO NOT FORGET to uncomment on remote:
+INTELFLAGS?=
+# on remote:
 # INTELFLAGS = -diag-disable=10441
 
 BUILD:=build
 SRC:=src
 RES:=res
 
-SBATCHS:=256 512 1024 2048 4096
-REFS:=$(SBATCHS:%=res/base%.out)
+HOSTNAME:=$(shell hostname)
+USERNAME:=$(shell whoami)
 
-# ------------
-# MAIN ENTRIES
-# ------------
+SAMPLES:=256 512 1024 2048 4096
+REFS:=$(SAMPLES:%=res/base%.out)
 
-.PHONY: ref
+# ---
+# REF
+# ---
+
+.PHONY: ref serial mpi run clean
 
 ref: $(REFS)
 
-all: serial mpi
+$(RES)/base%.out: sh/run.sh
+	@echo "[Make] Generating $@ using run.sh"
+	bash sh/run.sh serial $* --genRef
 
 # ------
 # SERIAL
@@ -51,10 +57,18 @@ $(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(SRC)/DiffusionSolver.cpp $(SRC)/scenarios
 	$(CPP) $(CFLAGS) $(OPTFLAGS) $(MPIFLAGS) $^ -o $@
 
 # ---
+# REF
+# ---
+
+$(RES)/base%.out: $(BUILD)/serial.exe
+	@mkdir -p $(RES)
+	./build/serial.exe --ratio $* --genRef
+
+# ---
 # RUN
 # ---
 
-run: ref
+run: $(REFS)
 	sbatch serial.sbatch 4096
 	#sbatch  mpi.sbatch 4096    # mpi
 
