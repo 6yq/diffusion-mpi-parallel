@@ -29,9 +29,7 @@ OUTS    := $(SAMPLES:%=$(OUTDIR)/output%.out)
 # --------------------
 # Top-level targets
 # --------------------
-.PHONY: all serial mpi ref run clean
-
-all: serial
+.PHONY: serial mpi ref run clean
 
 ref: $(REFS)
 run: $(OUTS)
@@ -59,16 +57,18 @@ $(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(SRC)/DiffusionSolver.cpp $(SRC)/scenarios
 # --------------------
 # Generate reference results
 # --------------------
-$(REFDIR)/base%.out: $(BUILD)/serial.exe $(SHDIR)/run.sh
+$(REFDIR)/base%.out: $(SHDIR)/run.sh
 	@mkdir -p $(REFDIR)
 	bash $(SHDIR)/run.sh serial $* --genRef
+	mv $(REFDIR)/base.out $@
 
 # --------------------
 # Generate output results (test run)
 # --------------------
-$(OUTDIR)/output%.out: $(BUILD)/serial.exe $(REFS) $(SHDIR)/run.sh
+$(OUTDIR)/output%.out: $(SHDIR)/run.sh
 	@mkdir -p $(OUTDIR)
 	bash $(SHDIR)/run.sh serial $*
+	mv $(OUTDIR)/output.out $@
 
 # --------------------
 # Clean up

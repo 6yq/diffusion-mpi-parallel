@@ -22,32 +22,30 @@ int main(int argc, char **argv) {
   char output_file[256] = "";
 
   int cur_arg = 1;
-  int num_args = argc - 1;
+  while (cur_arg < argc) {
+    if (strcmp(argv[cur_arg], "--genRef") == 0) {
+      gen_ref = true;
+      cur_arg += 1;
+      continue;
+    }
 
-  while (num_args > 0) {
-    if (num_args == 1) {
+    if (cur_arg + 1 >= argc) {
       fprintf(stderr, "Missing argument value for %s\n", argv[cur_arg]);
       return 1;
     }
 
-    if (strcmp(argv[cur_arg], "--n_theta") == 0) {
+    if (strcmp(argv[cur_arg], "--n-theta") == 0) {
       n_theta = atoi(argv[cur_arg + 1]);
-    } else if (strcmp(argv[cur_arg], "--n_phi") == 0) {
+    } else if (strcmp(argv[cur_arg], "--n-phi") == 0) {
       n_phi = atoi(argv[cur_arg + 1]);
     } else if (strcmp(argv[cur_arg], "--ratio") == 0) {
       ratio = atof(argv[cur_arg + 1]);
-    } else if (strcmp(argv[cur_arg], "--genRef") == 0) {
-      gen_ref = true;
-      cur_arg += 1;
-      num_args -= 1;
-      continue;
     } else {
       fprintf(stderr, "Unknown argument: %s\n", argv[cur_arg]);
       return 1;
     }
 
     cur_arg += 2;
-    num_args -= 2;
   }
 
   double *phi = (double *)calloc(n_theta * n_phi, sizeof(double));
@@ -68,9 +66,9 @@ int main(int argc, char **argv) {
          (double)(init_end - init_start) / CLOCKS_PER_SEC);
 
   if (gen_ref)
-    sprintf(output_file, "res/base.out");
+    sprintf(output_file, "ref/base.out");
   else
-    sprintf(output_file, "output_ratio%.2f.out", ratio);
+    sprintf(output_file, "output.out");
 
   FILE *fptr = fopen(output_file, "wb");
   if (!fptr) {
