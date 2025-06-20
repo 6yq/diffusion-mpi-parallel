@@ -46,7 +46,7 @@ if [[ "$PLATFORM" == "remote" ]]; then
   if [[ "$MODE" == "serial" ]]; then
     sbatch --output=ref/serial${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
   elif [[ "$MODE" == "mpi" ]]; then
-    sbatch --output=ref/mpi${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
+    sbatch --output=opt/mpi${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
   fi
 else
   echo "[Info] Running locally"
