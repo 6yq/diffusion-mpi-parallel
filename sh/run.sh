@@ -35,7 +35,7 @@ if [[ "$PLATFORM" == "remote" ]]; then
   make $MODE CPP=mpiicc INTELFLAGS="-diag-disable=10441"
 else
   echo "[Info] Using default Makefile on local"
-  make $MODE
+  make $MODE CPP=mpic++
 fi
 
 # ---
