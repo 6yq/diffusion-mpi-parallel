@@ -4,4 +4,4 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --output=serial.log
-./build/serial.exe --nx $1 --ny $1
+./build/serial.exe --n-theta $1 --n-phi $1

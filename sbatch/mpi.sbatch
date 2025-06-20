@@ -5,4 +5,4 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --cpus-per-task=8
 #SBATCH --output=mpi.log
-mpirun  ./build/mpi.exe  --nx $1 --ny $1
+mpirun  ./build/mpi.exe --n-theta $1 --n-phi $1

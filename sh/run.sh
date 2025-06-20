@@ -48,8 +48,21 @@ else
   echo "[Info] Running locally"
   if [[ "$MODE" == "serial" ]]; then
     ./build/serial.exe --n-theta $SIZE --n-phi $SIZE $GENREF_FLAG
+    mv ref/base.out ref/base${SIZE}.out
+    if [[ "$GENREF" == "--genRef" ]]; then
+      mv serial.log ref/serial${SIZE}.log
+    else
+      mv serial.log opt/opt${SIZE}.log
+    fi
+    
   elif [[ "$MODE" == "mpi" ]]; then
     mpirun -np 4 ./build/mpi.exe --n-theta $SIZE --n-phi $SIZE $GENREF_FLAG
+    mv ref/base.out ref/base${SIZE}.out
+    if [[ "$GENREF" == "--genRef" ]]; then
+      mv mpi.log ref/mpi${SIZE}.log
+    else
+      mv mpi.log opt/opt${SIZE}.log
+    fi
   else
     echo "[Error] Unknown mode: $MODE"
     exit 1
