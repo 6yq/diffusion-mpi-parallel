@@ -1,5 +1,6 @@
 #include "DiffusionSolver.hpp"
 #include "note.hpp"
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <mpi.h>
@@ -11,6 +12,9 @@ int t = 0;
 int rank, num_procs;
 int local_start, local_end, local_size;
 
+int *gather_recvcounts = nullptr;
+int *gather_displs = nullptr;
+
 void exchange_ghost_cells(double *phi) {
   MPI_Status status;
   int up = rank - 1;
@@ -19,14 +23,14 @@ void exchange_ghost_cells(double *phi) {
   // send up, receive from down
   if (down < num_procs) {
     MPI_Sendrecv(&phi[(local_size - 2) * N_PHI], N_PHI, MPI_DOUBLE, down, 0,
-                 &phi[(local_size - 1) * N_PHI], N_PHI, MPI_DOUBLE, down, 0,
+                 &phi[(local_size - 1) * N_PHI], N_PHI, MPI_DOUBLE, down, 1,
                  MPI_COMM_WORLD, &status);
   }
 
   // send down, receive from up
   if (up >= 0) {
     MPI_Sendrecv(&phi[1 * N_PHI], N_PHI, MPI_DOUBLE, up, 1, &phi[0 * N_PHI],
-                 N_PHI, MPI_DOUBLE, up, 1, MPI_COMM_WORLD, &status);
+                 N_PHI, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &status);
   }
 }
 
@@ -44,8 +48,7 @@ void init(double *phi_global, int n_theta, int n_phi, double radius_,
   dtheta = M_PI / (N_THETA - 1);
   dphi = 2 * M_PI / N_PHI;
 
-  // Calculate how many rows (theta slices) each process gets, excluding
-  // boundaries
+  // Compute distribution
   int *sendcounts = (int *)malloc(num_procs * sizeof(int));
   int *displs = (int *)malloc(num_procs * sizeof(int));
   int offset = 0;
@@ -57,7 +60,20 @@ void init(double *phi_global, int n_theta, int n_phi, double radius_,
     offset += sendcounts[i];
   }
 
-  // Determine the global start and end indices of the rows for this rank
+  gather_recvcounts = (int *)malloc(num_procs * sizeof(int));
+  gather_displs = (int *)malloc(num_procs * sizeof(int));
+
+  for (int i = 0; i < num_procs; ++i) {
+    int rows = (N_THETA - 2) / num_procs + (i < (N_THETA - 2) % num_procs);
+    gather_recvcounts[i] = rows * N_PHI;
+  }
+
+  gather_displs[0] = N_PHI;
+  for (int i = 1; i < num_procs; ++i) {
+    gather_displs[i] = gather_displs[i - 1] + gather_recvcounts[i - 1];
+  }
+
+  // Compute local bounds
   int chunk = (N_THETA - 2) / num_procs;
   int rem = (N_THETA - 2) % num_procs;
 
@@ -70,12 +86,9 @@ void init(double *phi_global, int n_theta, int n_phi, double radius_,
   rhs1_local = (double *)calloc(local_size * N_PHI, sizeof(double));
   rhs2_local = (double *)calloc(local_size * N_PHI, sizeof(double));
 
-  // Distribute initial phi values from rank 0 to all ranks (skip theta=0 row)
-  if (phi_global != NULL) {
-    MPI_Scatterv(phi_global + N_PHI, sendcounts, displs, MPI_DOUBLE,
-                 phi_local + N_PHI, sendcounts[rank], MPI_DOUBLE, 0,
-                 MPI_COMM_WORLD);
-  }
+  MPI_Scatterv(rank == 0 ? (phi_global + N_PHI) : NULL, sendcounts, displs,
+               MPI_DOUBLE, phi_local + N_PHI, sendcounts[rank], MPI_DOUBLE, 0,
+               MPI_COMM_WORLD);
 
   free(sendcounts);
   free(displs);
@@ -164,11 +177,9 @@ void step() {
 }
 
 void transfer(double *phi_global) {
-  // Each process sends its valid rows (excluding halos) to rank 0
-  // Note: NULLs are placeholders for sendcounts/displs which should be
-  // precomputed
   MPI_Gatherv(&phi_local[1 * N_PHI], (local_size - 2) * N_PHI, MPI_DOUBLE,
-              phi_global + N_PHI, NULL, NULL, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+              rank == 0 ? (phi_global + N_PHI) : NULL, gather_recvcounts,
+              gather_displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 }
 
 void free_memory() {
@@ -176,4 +187,9 @@ void free_memory() {
   free(rhs_local);
   free(rhs1_local);
   free(rhs2_local);
+
+  if (gather_recvcounts)
+    free(gather_recvcounts);
+  if (gather_displs)
+    free(gather_displs);
 }
