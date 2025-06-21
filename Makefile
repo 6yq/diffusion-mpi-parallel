@@ -7,7 +7,7 @@ CPP = mpic++
 CFLAGS     = -lm
 COPTFLAGS  = -O3 -ffast-math -fopenmp -flto -march=native -funroll-loops
 OPTFLAGS   = -O3 -ffast-math -fopenmp -flto -march=native -funroll-loops
-MPIFLAGS   = -D_MPI
+# MPIFLAGS   = -D_MPI
 DEBUGFLAGS = -g -pg
 INTELFLAGS ?=
 # on remote:
@@ -54,7 +54,7 @@ mpi: $(BUILD)/mpi.exe
 
 $(BUILD)/mpi.exe: $(SRC)/mainMPI.cpp $(SRC)/DiffusionSolverMPI.cpp $(COMMON_SRC) $(COMMON_HDR)
 	@mkdir -p $(BUILD)
-	$(CPP) $(SRC)/mainSerial.cpp $(SRC)/DiffusionSolverMPI.cpp $(COMMON_SRC) -o $@ $(CFLAGS) $(OPTFLAGS) $(MPIFLAGS) $(INTELFLAGS)
+	$(CPP) $(SRC)/mainMPI.cpp $(SRC)/DiffusionSolverMPI.cpp $(COMMON_SRC) -o $@ $(CFLAGS) $(OPTFLAGS) $(INTELFLAGS)
 
 # --------------------
 # Generate reference results
