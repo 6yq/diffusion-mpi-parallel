@@ -51,9 +51,9 @@ if [[ "$PLATFORM" == "remote" ]]; then
 else
   echo "[Info] Running locally"
   if [[ "$MODE" == "serial" ]]; then
-    ./build/serial.exe --n-theta $SIZE --n-phi $SIZE $GENREF_FLAG
+    ./build/serial.exe --n-theta $SIZE --n-phi $SIZE $GENREF_FLAG > ref/serial${SIZE}.log
   elif [[ "$MODE" == "mpi" ]]; then
-    mpirun -np 4 ./build/mpi.exe --n-theta $SIZE --n-phi $SIZE
+    mpirun -np 4 ./build/mpi.exe --n-theta $SIZE --n-phi $SIZE > opt/mpi${SIZE}.log
   else
     echo "[Error] Unknown mode: $MODE"
     exit 1
