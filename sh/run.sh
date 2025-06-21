@@ -44,14 +44,22 @@ fi
 if [[ "$PLATFORM" == "remote" ]]; then
   echo "[Info] Submitting sbatch job"
   if [[ "$MODE" == "serial" ]]; then
-    sbatch --output=ref/serial${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
+    if [[ "$GENREF_FLAG" == "--genRef" ]]; then
+      sbatch --output=ref/serial${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
+    else
+      sbatch --output=opt/serial${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
+    fi
   elif [[ "$MODE" == "mpi" ]]; then
     sbatch --output=opt/mpi${SIZE}.log ./sbatch/${MODE}.sbatch $SIZE $GENREF_FLAG
   fi
 else
   echo "[Info] Running locally"
   if [[ "$MODE" == "serial" ]]; then
-    ./build/serial.exe --n-theta $SIZE --n-phi $SIZE $GENREF_FLAG > ref/serial${SIZE}.log
+    if [[ "$GENREF_FLAG" == "--genRef" ]]; then
+      ./build/serial.exe --n-theta $SIZE --n-phi $SIZE $GENREF_FLAG > ref/serial${SIZE}.log
+    else
+      ./build/serial.exe --n-theta $SIZE --n-phi $SIZE $GENREF_FLAG > opt/serial${SIZE}.log
+    fi
   elif [[ "$MODE" == "mpi" ]]; then
     mpirun -np 4 ./build/mpi.exe --n-theta $SIZE --n-phi $SIZE > opt/mpi${SIZE}.log
   else
